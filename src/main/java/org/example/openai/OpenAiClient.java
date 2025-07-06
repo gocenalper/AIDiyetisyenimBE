@@ -13,6 +13,7 @@ import java.util.Map;
 @Component
 public class OpenAiClient {
 
+
     @Value("${openai.api.key}")
     private String apiKey;
 
@@ -23,9 +24,9 @@ public class OpenAiClient {
 
     public String callOpenAi(String prompt) {
         Map<String, Object> requestBody = Map.of(
-                "model", "gpt-4",
+                "model", "gpt-4o",
                 "messages", List.of(Map.of("role", "user", "content", prompt)),
-                "temperature", 0.8
+                "temperature", 0.7
         );
 
         return webClient.post()

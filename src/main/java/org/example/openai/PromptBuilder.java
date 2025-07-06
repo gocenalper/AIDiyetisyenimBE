@@ -12,62 +12,61 @@ public class PromptBuilder {
         String allergic = listToString(request.getAllergicFoods());
 
         return """
-        Sen bir diyetisyensin. Aşağıda belirtilen kullanıcının bilgilerinden yola çıkarak, haftalık bir diyet listesi oluşturmanı istiyorum.
+    Sen bir diyetisyensin. Aşağıdaki kullanıcı bilgilerine göre, sadece geçerli JSON olacak şekilde bir haftalık diyet listesi üret.
 
-        Kurallar:
-        1. 7 gün boyunca her gün için ayrı diyet oluştur.
-        2. Her gün için 5 öğün ver: 
-           - Kahvaltı (BREAKFAST)
-           - Sabah Ara Öğünü (MORNING_SNACK)
-           - Öğle Yemeği (LUNCH)
-           - Öğleden Sonra Ara Öğün (AFTERNOON_SNACK)
-           - Akşam Yemeği (DINNER)
-        3. Her öğünde 2-4 farklı besin olsun.
-        4. Her besin için aşağıdaki bilgiler ayrı ayrı verilmelidir:
-           - name: Besinin adı (örneğin "Yulaf ezmesi")
-           - amount: Sayı cinsinden miktar (örneğin 50)
-           - unit: Birim (örneğin "gram", "adet", "kase", "dilim", "yemek kaşığı", "bardak")
-           - calories: Kalori değeri (örneğin 180)
-        5. day alanı İngilizce büyük harflerle olsun: MONDAY, TUESDAY, ..., SUNDAY
-        6. mealType alanı aşağıdaki 5 değerden biri olsun:
-           - BREAKFAST
-           - MORNING_SNACK
-           - LUNCH
-           - AFTERNOON_SNACK
-           - DINNER
+    Kurallar:
+    1. 7 gün boyunca her gün için 5 öğün içeren diyet oluştur:
+       - BREAKFAST
+       - MORNING_SNACK
+       - LUNCH
+       - AFTERNOON_SNACK
+       - DINNER
+    2. Her öğünde 2 ila 4 gıda yer almalı.
+    3. Her gıda şu formatta tanımlanmalı:
+       - name (örnek: "Yulaf ezmesi")
+       - amount (örnek: 50)
+       - unit (seçenekler: "GR", "MG", "ADET", "ML", "DILIM")
+       - calories (örnek: 180)
+    4. Gün adı `day` alanında MONDAY, TUESDAY, ... şeklinde İngilizce büyük harflerle belirtilmeli.
+    5. mealType alanı sadece şu 5 değerden biri olmalı: BREAKFAST, MORNING_SNACK, LUNCH, AFTERNOON_SNACK, DINNER
+    6. Yanıt sadece geçerli JSON içermeli. Açıklama, yorum, markdown kod bloğu (örneğin ```json) gibi ifadeler **asla** yer almamalı.
 
-        JSON örnek yapısı yalnızca aşağıdaki gibi olmalıdır:
+    Ek kriterler:
+    - Gıdalar Türkiye'de yaygın ve kolay bulunabilir olmalı.
+    - Maliyet orta düzey olmalı.
+    - Aynı besin 7 gün içinde maksimum 2 kez kullanılmalı.
+    - Yemekler pratik, günlük hayata uygun ve gerçekçi olmalı.
 
-        [
+    Kullanıcı bilgileri:
+    - Boy: %.0f cm
+    - Kilo: %.1f kg
+    - Hedef kilo: %.1f kg
+    - Aktivite seviyesi: %s
+    - Sevdiği yiyecekler: %s
+    - Sevmediği yiyecekler: %s
+    - Alerjik olduğu yiyecekler: %s
+
+    JSON örnek yapısı sadece aşağıdaki gibi olmalı:
+
+    [
+      {
+        "day": "MONDAY",
+        "meals": [
           {
-            "day": "MONDAY",
-            "meals": [
+            "mealType": "BREAKFAST",
+            "foods": [
               {
-                "mealType": "BREAKFAST",
-                "foods": [
-                  {
-                    "name": "Yulaf ezmesi",
-                    "amount": 50,
-                    "unit": "gram",
-                    "calories": 190
-                  }
-                ]
+                "name": "Yulaf ezmesi",
+                "amount": 50,
+                "unit": "gram",
+                "calories": 180
               }
             ]
           }
         ]
-
-        Kullanıcı bilgileri:
-        - Boy: %.0f cm
-        - Kilo: %.1f kg
-        - Hedef kilo: %.1f kg
-        - Aktivite seviyesi: %s
-        - Sevdiği yiyecekler: %s
-        - Sevmediği yiyecekler: %s
-        - Alerjik olduğu besinler: %s
-
-        Lütfen yalnızca yukarıdaki JSON formatında yanıt ver. Açıklama, yorum veya metin ekleme. Yanıt sadece geçerli JSON olmalı.
-        """.formatted(
+      }
+    ]
+    """.formatted(
                 request.getHeight(),
                 request.getWeight(),
                 request.getTargetWeight(),
@@ -81,9 +80,7 @@ public class PromptBuilder {
 
     private static String listToString(java.util.List<String> list) {
         if (list == null || list.isEmpty()) return "-";
-        StringJoiner joiner = new StringJoiner(", ");
-        list.forEach(joiner::add);
-        return joiner.toString();
+        return String.join(", ", list);
     }
 }
 

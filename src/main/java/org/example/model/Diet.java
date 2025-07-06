@@ -28,9 +28,6 @@ public class Diet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "diet", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    private Meal meal;
-
     @Column(nullable = false)
     private LocalDate dietStartDate;
 

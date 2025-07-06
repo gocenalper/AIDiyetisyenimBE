@@ -15,6 +15,7 @@ import org.example.service.DietGenerationService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 @Service
@@ -27,16 +28,20 @@ public class DietGenerationServiceImpl implements DietGenerationService {
     private final MealRepository mealRepository;
     private final FoodRepository foodRepository;
 
+    @Override
     public void createDietFromJson(String jsonResponse, User user) {
         try {
             JsonNode root = objectMapper.readTree(jsonResponse);
+            log.info("Received diet JSON: {}", jsonResponse);
+
             LocalDate startDate = LocalDate.now();
 
             for (int i = 0; i < root.size(); i++) {
                 JsonNode dayNode = root.get(i);
-                String day = dayNode.get("day").asText();
+                String dayText = dayNode.get("day").asText().toUpperCase(Locale.ENGLISH); // örn: "MONDAY"
                 LocalDate currentDate = startDate.plusDays(i);
 
+                // Diet kaydı oluştur
                 Diet diet = Diet.builder()
                         .user(user)
                         .dietStartDate(currentDate)
@@ -47,14 +52,14 @@ public class DietGenerationServiceImpl implements DietGenerationService {
                 JsonNode mealsNode = dayNode.get("meals");
 
                 for (JsonNode mealNode : mealsNode) {
-                    MealType mealType = MealType.valueOf(mealNode.get("mealType").asText());
-                    Set<Food> foodSet = new HashSet<>();
+                    MealType mealType = MealType.valueOf(mealNode.get("mealType").asText().toUpperCase(Locale.ENGLISH));
+                    List<Food> foodSet = new ArrayList<>();
 
                     for (JsonNode foodNode : mealNode.get("foods")) {
                         Food food = Food.builder()
                                 .name(foodNode.get("name").asText())
                                 .amount(new BigDecimal(foodNode.get("amount").asText()))
-                                .unit(Unit.valueOf(foodNode.get("unit").asText().toUpperCase()))
+                                .unit(Unit.valueOf(foodNode.get("unit").asText().toUpperCase(Locale.ENGLISH)))
                                 .calories(new BigDecimal(foodNode.get("calories").asText()))
                                 .build();
                         foodRepository.save(food);
@@ -64,12 +69,13 @@ public class DietGenerationServiceImpl implements DietGenerationService {
                     Meal meal = Meal.builder()
                             .diet(diet)
                             .mealType(mealType)
+                            .dayOfWeek(DayOfWeek.valueOf(dayText))
                             .foods(foodSet)
                             .build();
                     mealRepository.save(meal);
                 }
 
-                log.info("Created diet for {} ({})", user.getEmail(), currentDate);
+                log.info("Created diet for user {} on {}", user.getEmail(), currentDate);
             }
 
         } catch (Exception e) {
