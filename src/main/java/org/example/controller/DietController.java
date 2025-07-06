@@ -26,7 +26,8 @@ public class DietController {
                 HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/current")
+    @CrossOrigin(origins = "*")
+    @PostMapping("/current")
     public ResponseEntity<GetCurrentDietResponse> getCurrentDiet(@RequestBody final GetCurrentDietRequest request) {
         final GetCurrentDietResponse response =  dietService.getDietResponseForUser(request);
 
