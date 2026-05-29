@@ -9,6 +9,7 @@ import org.example.model.enums.MealType;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,9 +41,9 @@ public class Meal {
             joinColumns = @JoinColumn(name = "meal_id"),
             inverseJoinColumns = @JoinColumn(name = "food_id")
     )
-    private Set<Food> foods;
+    private List<Food> foods;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "diet_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "diet_id", nullable = false)
     private Diet diet;
 }

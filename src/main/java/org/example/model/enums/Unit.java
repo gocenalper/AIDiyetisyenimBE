@@ -4,6 +4,7 @@ public enum Unit {
 
     GR,
     MG,
-    L,
-    ML
+    ADET,
+    ML,
+    DILIM
 }
